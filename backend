@@ -1,0 +1,53 @@
+const express = require('express');
+const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
+const cors = require('cors'); // Import cors middleware
+const app = express();
+const port = 3001;
+// Connect to MongoDB using Mongoose
+mongoose.connect('mongodb+srv://
+adhulchristotj01:adhul123@cluster0.qqul4ue.mongodb.net/?
+retryWrites=true&w=majority&appName=Cluster0', { dbName: 'Todo-Application' })
+ .then(() => console.log('Connected successfully to database'))
+ .catch(err => console.error('Error connecting to database:', err));
+// Define schema for items collection
+const itemSchema = new mongoose.Schema({
+ name: String,
+ description: String,
+ price: Number
+});
+// Create Item model
+const Item = mongoose.model('Item', itemSchema);
+app.use(bodyParser.json());
+app.use(cors()); // Enable CORS for all routes
+// Create
+app.post('/items', (req, res) => {
+ const newItem = new Item(req.body);
+ newItem.save()
+ .then(item => res.send(item))
+ .catch(err => res.status(500).send(err));
+});
+// Read
+app.get('/items', (req, res) => {
+ Item.find({})
+ .then(items => res.send(items))
+ .catch(err => res.status(500).send(err));
+});
+// Update
+app.put('/items/:id', (req, res) => {
+ const itemId = req.params.id;
+ const updatedItem = req.body;
+ Item.findByIdAndUpdate(itemId, updatedItem, { new: true })
+ .then(item => res.send(item))
+ .catch(err => res.status(500).send(err));
+});
+// Delete
+app.delete('/items/:id', (req, res) => {
+ const itemId = req.params.id;
+ Item.findByIdAndDelete(itemId)
+ .then(item => res.send(item))
+ .catch(err => res.status(500).send(err));
+});
+app.listen(port, () => {
+ console.log(`Server is listening on port ${port}`);
+});
